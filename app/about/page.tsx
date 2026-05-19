@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { testimonials } from '@/lib/data';
 import MagneticButton from '@/components/magnetic-button';
 import VideoShowcase from '@/components/video-showcase';
@@ -18,6 +18,15 @@ const credentials = [
 export default function AboutPage() {
   const heroRef = useRef(null);
   const heroInView = useInView(heroRef, { once: true });
+  const heroScrollRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: heroScrollRef,
+    offset: ["start start", "end start"]
+  });
+  const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
+  const imageFilter = useTransform(scrollYProgress, [0, 1], ["grayscale(100%) brightness(100%)", "grayscale(0%) brightness(120%)"]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0.4, 0]);
+  const bottomGradientOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
   const storyRef = useRef(null);
   const storyInView = useInView(storyRef, { once: true, margin: '-100px' });
   const visionRef = useRef(null);
@@ -30,24 +39,46 @@ export default function AboutPage() {
   return (
     <div className="pt-20">
       {/* Hero */}
-      <section ref={heroRef} className="min-h-[60vh] flex items-end px-6 md:px-12 max-w-[1440px] mx-auto pb-16 md:pb-24">
-        <div className="w-full">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={heroInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5 }}
-            className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4"
-          >
-            Founder & Lead Designer
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={heroInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="font-heading text-6xl md:text-8xl lg:text-9xl tracking-tight leading-[0.85]"
-          >
-            HELLO, I&apos;M ABDUL TAWWAB KHAN.
-          </motion.h1>
+      <section ref={heroScrollRef} className="relative h-[250vh] w-full">
+        <div className="sticky top-0 h-screen w-full overflow-hidden flex items-end px-6 md:px-12 pb-16 md:pb-24">
+          <motion.div style={{ scale, filter: imageFilter }} className="absolute inset-0 z-0">
+            <img 
+              src="/videos/images/ABDUL%20.jpeg" 
+              alt="Abdul Tawwab Khan" 
+              className="w-full h-full object-cover object-[center_25%]"
+            />
+            {/* Fading dark overlay */}
+            <motion.div style={{ opacity: overlayOpacity }} className="absolute inset-0 bg-black" />
+            {/* Bottom gradient that fades away while scrolling */}
+            <motion.div style={{ opacity: bottomGradientOpacity }} className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          </motion.div>
+          
+          <div ref={heroRef} className="relative z-10 w-full max-w-[1440px] mx-auto text-white">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={heroInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5 }}
+              className="text-xs tracking-[0.3em] uppercase text-white/80 mb-4"
+            >
+              Founder & Lead Designer
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={heroInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="font-heading text-6xl md:text-8xl lg:text-9xl tracking-tight leading-[0.85] drop-shadow-md"
+            >
+              <motion.span
+                initial={{ opacity: 0, y: "-80vh", rotate: -360 }}
+                animate={heroInView ? { opacity: 1, y: 0, rotate: 0 } : {}}
+                transition={{ duration: 4.5, delay: 0.2, type: "spring", bounce: 0.25 }}
+                className="inline-block"
+              >
+                H
+              </motion.span>
+              ELLO, I&apos;M ABDUL TAWWAB KHAN.
+            </motion.h1>
+          </div>
         </div>
       </section>
 
